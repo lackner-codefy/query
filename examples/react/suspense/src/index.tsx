@@ -10,12 +10,9 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import { fetchProjects } from './queries'
-
 import Button from './components/Button'
-
-const Projects = lazy(() => import('./components/Projects'))
-const Project = lazy(() => import('./components/Project'))
+import ComponentA from './components/ComponentA'
+import ComponentB from './components/ComponentB'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,26 +32,14 @@ function App() {
 
 function Example() {
   const queryClient = useQueryClient()
-  const [showProjects, setShowProjects] = React.useState(false)
-  const [activeProject, setActiveProject] = React.useState<string | null>(null)
+  const [status, setStatus] = React.useState<number>(0);
 
   return (
     <>
-      <Button
-        onClick={() => {
-          setShowProjects((old) => {
-            if (!old) {
-              queryClient.prefetchQuery({
-                queryKey: ['projects'],
-                queryFn: fetchProjects,
-              })
-            }
-            return !old
-          })
-        }}
-      >
-        {showProjects ? 'Hide Projects' : 'Show Projects'}
-      </Button>
+      Which component should be mounted?
+      <Button onClick={() => setStatus(0)}>None</Button>
+      <Button onClick={() => setStatus(1)}>Query</Button>
+      <Button onClick={() => setStatus(2)}>SuspenseQuery</Button>
 
       <hr />
 
@@ -70,18 +55,8 @@ function Example() {
             )}
             onReset={reset}
           >
-            <React.Suspense fallback={<h1>Loading projects...</h1>}>
-              {showProjects ? (
-                activeProject ? (
-                  <Project
-                    activeProject={activeProject}
-                    setActiveProject={setActiveProject}
-                  />
-                ) : (
-                  <Projects setActiveProject={setActiveProject} />
-                )
-              ) : null}
-            </React.Suspense>
+            {status === 1 ? <ComponentA /> : null}
+            {status === 2 ? <ComponentB /> : null}
           </ErrorBoundary>
         )}
       </QueryErrorResetBoundary>
